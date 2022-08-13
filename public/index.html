@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="screen">
+      <div class="box">
+        <p class="title">Welcome to torrent base file server.</p>
+        <div class="link">
+          <a class="icon folder-icon" href="/downloads"></a>
+          <a id="addLink" class="icon file-icon" href="#"></a>
+        </div>
+        <div id="stat" class="stat"></div>
+      </div>
+      <div id="pop" class="popBack hidden">
+        <div id="popWindow" class="pop">
+          <div class="box">
+            <form id="form">
+              <input id="url" name="url" type="url" />
+              <button type="submit">Add</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    const stat = document.getElementById("stat");
+
+    const getStat = async () => {
+      const res = await fetch("/stat");
+      const json = await res.json();
+      stat.innerText = Object.values(json).join(" ");
+    };
+
+    setInterval(getStat, 1000);
+
+    const pop = document.getElementById("pop");
+    const addLink = document.getElementById("addLink");
+    const popWindow = document.getElementById("popWindow");
+    addLink.onclick = (e) => togglePop(e);
+    pop.onclick = (e) => togglePop(e);
+    popWindow.onclick = (e) => e.stopPropagation();
+
+    const setPop = (state) => {
+      if (state) pop.classList.add("hidden");
+      else pop.classList.remove("hidden");
+    };
+    const togglePop = () => {
+      if (pop.classList.contains("hidden")) setPop(false);
+      else setPop(true);
+    };
+
+    const form = document.getElementById("form");
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+
+      togglePop();
+      const url = document.getElementById("url").value;
+
+      if (url == "") alert("Empty link");
+
+      const res = await fetch("/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      });
+      const json = await res.json();
+      alert(JSON.stringify(json));
+    };
+  </script>
+</html>
